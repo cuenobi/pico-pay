@@ -17,7 +17,7 @@ func main() {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %s \n", err))
+		panic(fmt.Errorf("fatal error config file: %s", err))
 	}
 
 	dbDialect := viper.GetString("DB.DIALECT")
