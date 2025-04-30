@@ -1,21 +1,30 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"os"
-	"strconv"
 
-	"picopay/common/constant"
 	database "picopay/common/databases"
 	"picopay/common/models"
+
+	"github.com/spf13/viper"
 )
 
 func main() {
-	dbDialect := getEnv("DB_DIALECT", constant.POSTGRES)
-	dbDSN := getEnv("DB_DSN", "postgres://admin:P@ssword1234@localhost:5432/pico-pay?sslmode=disable")
-	maxOpen := getEnvAsInt("DB_MAX_OPEN", 10)
-	maxIdle := getEnvAsInt("DB_MAX_IDLE", 5)
-	maxLife := getEnvAsInt("DB_CONN_LIFETIME", 5)
+	viper.SetConfigName("config")
+	viper.AddConfigPath("../../../")
+	viper.AutomaticEnv()
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("fatal error config file: %s \n", err))
+	}
+
+	dbDialect := viper.GetString("DB.DIALECT")
+	dbDSN := viper.GetString("DB.DSN")
+	maxOpen := viper.GetInt("DB.MAX_OPEN")
+	maxIdle := viper.GetInt("DB.MAX_IDLE")
+	maxLife := viper.GetInt("DB.CONN_LIFETIME")
 
 	cfg := database.Config{
 		Dialect:            dbDialect,
@@ -24,6 +33,8 @@ func main() {
 		SetMaxIdleConns:    maxIdle,
 		SetConnMaxLifetime: maxLife,
 	}
+
+	fmt.Println(cfg)
 
 	// Init DB
 	if err := database.Init(cfg); err != nil {
@@ -36,26 +47,4 @@ func main() {
 	}
 
 	log.Println("✅ Database migration complete!")
-}
-
-// --- Helpers ---
-
-func getEnv(key, fallback string) string {
-	val := os.Getenv(key)
-	if val == "" {
-		return fallback
-	}
-	return val
-}
-
-func getEnvAsInt(key string, fallback int) int {
-	valStr := os.Getenv(key)
-	if valStr == "" {
-		return fallback
-	}
-	val, err := strconv.Atoi(valStr)
-	if err != nil {
-		return fallback
-	}
-	return val
 }
