@@ -1,13 +1,13 @@
 package models
 
 type User struct {
+	BaseModel
+
 	FirstName string `gorm:"not null" json:"first_name"`
 	LastName  string `gorm:"not null" json:"last_name"`
 	Email     string `gorm:"unique;not null" json:"email"`
 	Password  string `gorm:"not null" json:"password"`
 
-	WalletID *string      `gorm:"not null;uniqueIndex:idx_wallet" json:"wallet_id"`
+	WalletID *string `gorm:"not null;uniqueIndex:idx_wallet" json:"wallet_id"`
 	Wallet   *Wallet `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"wallet"`
-
-	BaseModel
 }
